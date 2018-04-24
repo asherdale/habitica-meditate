@@ -1,0 +1,57 @@
+<!doctype html>
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+  <head>
+    <title>Habitica-Meditation Popup</title>
+    <style type="text/css">
+      body {
+        margin: 10px;
+        white-space: nowrap;
+      }
+
+      h1 {
+        font-size: 15px;
+      }
+
+      #container {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="popup.css" />
+
+    <script src="jquery-3.2.1.min.js"></script>
+    <script src="popup.js"></script>
+  </head>
+
+  <body>
+    <div id="container clear">
+      <div id="hab-login">
+        <h2>Log into Habitica</h2>
+        <input id="hab-user" type="email" placeholder="Habitica Email"/>
+        <br />
+        <input id="hab-pass" type="password" placeholder="Habitica Password"/>
+        <br />
+        <button id="hab-submit" type="submit">Log In</button>
+      </div>
+      <div id="insight-login">
+        <h2>Log into Insight Timer</h2>
+        <input id="insight-user" type="email" placeholder="Insight Timer Email"/>
+        <br />
+        <input id="insight-pass" type="password" placeholder="Insight Timer Password"/>
+        <br />
+        <button id="insight-submit" type="submit">Log In</button>
+      </div>
+      <div id="main">
+        <input id="meditation-num" type="number" placeholder="Daily Meditation Goal (in Minutes)"/>
+        <br />
+        <button id="create-daily" type="button">Create Daily!</button>
+      </div>
+    </div>
+  </body>
+</html>

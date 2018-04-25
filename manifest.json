@@ -5,7 +5,15 @@
   "description": "Integration for Habitica and Insight Timer :)",
   "version": "1.0",
   "background": {
-    "scripts": ["jquery-3.2.1.min.js", "jquery.csv.js", "moment.js", "eventPage.js"],
+    "scripts": [
+      "react.production.min.js",
+      "react-dom.production.min.js",
+      "jquery-3.2.1.min.js",
+      "jquery.csv.js",
+      "moment.js",
+      "config.js",
+      "eventPage.js"
+    ],
     "persistent": false
   },
   "browser_action": {

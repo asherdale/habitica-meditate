@@ -1,7 +1,7 @@
 const INSIGHT_LOGIN_URL = 'https://insighttimer.com/user_session';
 const INSIGHT_CSV_URL = 'https://insighttimer.com/sessions/export';
 const HABITICA_LOGIN_URL = 'https://habitica.com/api/v3/user/auth/local/login';
-const HABITICA_PREFS_URL = 'https://habitica.com/api/v3/user?userFields=preferences';
+const HABITICA_PREFS_URL = 'https://habitica.com/api/v3/user?userFields=preferences.dayStart';
 
 checkMeditationData = async (alarm) => {
   await $.ajax({
@@ -14,8 +14,8 @@ checkMeditationData = async (alarm) => {
   });
   
   const meditationData = await getMeditationData();
-  const customDayStart = await getHabiticaCustomDayStart();
-  const minsToday = await getMinsMeditatedToday(meditationData, customDayStart);
+  const habiticaDayStart = await getHabiticaDayStart();
+  const minsToday = await getMinsMeditatedToday(meditationData, habiticaDayStart);
   console.log('Minutes meditated today: ', minsToday);
 }
 
@@ -39,19 +39,18 @@ getMeditationData = async () => {
          getMeditationData();
 }
 
-getMinsMeditatedToday = (meditationData, customDayStart) => {
+getMinsMeditatedToday = (meditationData, habiticaDayStart) => {
   let meditationMinsToday = 0;
   let i = 2;
-  const habiticaDayStart = moment().startOf('day').add(customDayStart, 'h');
+
+  console.log(habiticaDayStart.format());
   while (meditationData[i]) {
     const offsetTime = moment(meditationData[i][0], 'MM-DD-YYYY HH:mm:ss');
     const correctTime = offsetTime.clone().add(offsetTime.utcOffset(), 'm');
     const sessionMins = parseInt(meditationData[i][1]);
     i += 1;
 
-    console.log(correctTime.format());
-    console.log(correctTime.diff(habiticaDayStart, 'h'));
-    if (!correctTime.isSame(moment(), 'day')) {
+    if (correctTime.isBefore(habiticaDayStart)) {
       break;
     }
 
@@ -60,7 +59,7 @@ getMinsMeditatedToday = (meditationData, customDayStart) => {
   return meditationMinsToday;
 }
 
-getHabiticaCustomDayStart = async () => {
+getHabiticaDayStart = async () => {
   const user = await $.ajax({
     url: HABITICA_LOGIN_URL,
     type: 'POST',
@@ -76,7 +75,14 @@ getHabiticaCustomDayStart = async () => {
       xhr.setRequestHeader('x-api-key',  user.data.apiToken);
     }
   });
-  return userData.data.preferences.dayStart;
+
+  const customStartHour = userData.data.preferences.dayStart;
+  const customStartTime = moment().startOf('day').add(customStartHour, 'h');
+  if (moment().hour() < customStartHour) {
+    customStartTime.subtract(1, 'days');
+  }
+
+  return customStartTime;
 }
 
 chrome.alarms.clearAll(() => {

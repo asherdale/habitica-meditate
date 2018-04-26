@@ -12,7 +12,7 @@ checkMeditationData = async (alarm) => {
       'user_session[password]': INSIGHT_PASSWORD,
     }
   });
-  
+  return;
   const meditationData = await getMeditationData();
   const habiticaDayStart = await getHabiticaDayStart();
   const minsToday = await getMinsMeditatedToday(meditationData, habiticaDayStart);

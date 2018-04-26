@@ -7,34 +7,19 @@
 <html>
   <head>
     <title>Habitica-Meditation Popup</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../css/popup.css" />
     <script src="../../../vendor/jquery-3.2.1.min.js"></script>
     <script src="../js/popup.js"></script>
   </head>
 
   <body>
-    <div id="container clear">
-      <div id="hab-login">
-        <h2>Log into Habitica</h2>
-        <input id="hab-user" type="email" placeholder="Habitica Email"/>
-        <br />
-        <input id="hab-pass" type="password" placeholder="Habitica Password"/>
-        <br />
-        <button id="hab-submit" type="submit">Log In</button>
-      </div>
-      <div id="insight-login">
-        <h2>Log into Insight Timer</h2>
-        <input id="insight-user" type="email" placeholder="Insight Timer Email"/>
-        <br />
-        <input id="insight-pass" type="password" placeholder="Insight Timer Password"/>
-        <br />
-        <button id="insight-submit" type="submit">Log In</button>
-      </div>
-      <div id="main">
-        <input id="meditation-num" type="number" placeholder="Daily Meditation Goal (in Minutes)"/>
-        <br />
-        <button id="create-daily" type="button">Create Daily!</button>
-      </div>
+    <div class="container text-center">
+      <h4 class="login-header">Step 1: Login to Habitica</h4>
+      <input class="form-control" placeholder="User ID">        
+      <input type="password" class="form-control" placeholder="API Token">
+      <button class="btn btn-primary login-button">Login</button>
     </div>
+    <div id="dump"></div>
   </body>
 </html>

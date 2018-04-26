@@ -1,26 +1,18 @@
 body {
-	margin: 10px;
-	white-space: nowrap;
+   	width: 300px;
+   	/*height: 200px;*/
+   	margin: 20px;
 }
 
-h1 {
-	font-size: 15px;
+.form-control {
+	margin: 15px 0;
 }
 
-#container {
-	align-items: center;
-	display: flex;
-	justify-content: space-between;
+.login-button {
+	border-radius: 10px;
+	font-size: 17px;
 }
 
-#hab-login {
-  display: none;
-}
-
-#insight-login {
-  display: none;
-}
-
-#main {
-  display: none;
+.login-header {
+	margin: 0 0 20px 0;
 }

@@ -12,13 +12,12 @@
       "vendor/jquery.csv.js",
       "vendor/moment.js",
       "src/js/helpers.js",
-      "src/js/config.js",
       "src/js/eventPage.js"
     ],
     "persistent": false
   },
   "browser_action": {
-    "default_icon": "assets/icon.png",
+    "default_icon": "assets/icon-main.png",
     "default_popup": "src/html/popup.html",
     "default_title": "Habitica-Meditate"
   },

@@ -1,17 +1,4 @@
-const INSIGHT_LOGIN_URL = 'https://insighttimer.com/user_session';
-const INSIGHT_CSV_URL = 'https://insighttimer.com/sessions/export';
-const HABITICA_LOGIN_URL = 'https://habitica.com/api/v3/user/auth/local/login';
-const HABITICA_PREFS_URL = 'https://habitica.com/api/v3/user?userFields=preferences.dayStart';
-
 checkMeditationData = async (alarm) => {
-  await $.ajax({
-    url: INSIGHT_LOGIN_URL,
-    type: 'POST',
-    data: {
-      'user_session[email]': INSIGHT_EMAIL,
-      'user_session[password]': INSIGHT_PASSWORD,
-    }
-  });
   return;
   const meditationData = await getMeditationData();
   const habiticaDayStart = await getHabiticaDayStart();
@@ -20,6 +7,7 @@ checkMeditationData = async (alarm) => {
 }
 
 getMeditationData = async () => {
+  await insightLogin(INSIGHT_EMAIL, INSIGHT_PASSWORD);
   const numGrabs = 7;
   const vals = await Promise.all(
     Array.from(
@@ -60,21 +48,7 @@ getMinsMeditatedToday = (meditationData, habiticaDayStart) => {
 }
 
 getHabiticaDayStart = async () => {
-  const user = await $.ajax({
-    url: HABITICA_LOGIN_URL,
-    type: 'POST',
-    data: {
-      'username': HABITICA_EMAIL,
-      'password': HABITICA_PASSWORD
-    }
-  });
-  const userData = await $.ajax({
-    url: HABITICA_PREFS_URL,
-    beforeSend: (xhr) => {
-      xhr.setRequestHeader('x-api-user', user.data.id);
-      xhr.setRequestHeader('x-api-key',  user.data.apiToken);
-    }
-  });
+  const userData = await getHabiticaCustomStart(HABITICA_USER_ID, HABITICA_API_TOKEN);
 
   const customStartHour = userData.data.preferences.dayStart;
   const customStartTime = moment().startOf('day').add(customStartHour, 'h');

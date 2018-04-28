@@ -1,85 +1,94 @@
-const HABITICA_LOGIN = true;
+const INSIGHT_LOGIN_CONFIG = {
+  header: 'Step 2: Login to Insight Timer',
+  userPlaceholder: 'Email',
+  passPlaceholder: 'Password'
+};
 
-$(document).ready(() => {
-  $('.login-button').click(login);
-});
+let HABITICA_LOGIN = true;
+
+$(document).ready(() => main());
+
+main = async () => {
+  $('#login-button').click(login);
+}
 
 login = () => {
   const loginInput = $('input').map((i, el) => $(el).val()).get();
-  return HABITICA_LOGIN ? habiticaLogin(loginInput) : insightLogin(loginInput);
+  return HABITICA_LOGIN ? clientHabiticaLogin(loginInput[0], loginInput[1])
+                        : clientInsightLogin(loginInput[0], loginInput[1]);
 }
 
-habiticaLogin = (input) => {
-  dump(input);
+clientHabiticaLogin = async (userId, apiToken) => {
+  try {
+    const userData = await getHabiticaCustomStart(HABITICA_USER_ID, HABITICA_API_TOKEN);
+    await saveData({habiticaUserId: userId, habiticaApiToken: apiToken});
+    transferToInsightLogin();
+  } catch (e) {
+    // TODO: show error for incorrect login info
+    dump(`Habitica login error: ${e}`);
+  }
 }
 
-insightLogin = (input) => {
-  
+transferToInsightLogin = () => {
+  HABITICA_LOGIN = false;
+  $('#login-header').text(INSIGHT_LOGIN_CONFIG.header);
+  const resetToPlaceholder = ($el, placeholder) => {
+    $el.val('');
+    $el.attr('placeholder', placeholder);
+  }
+  resetToPlaceholder($('#input-user'), INSIGHT_LOGIN_CONFIG.userPlaceholder);
+  resetToPlaceholder($('#input-pass'), INSIGHT_LOGIN_CONFIG.passPlaceholder);
+}
+
+clientInsightLogin = async (email, password) => {
+  const loginResult = await insightLogin(INSIGHT_EMAIL, INSIGHT_PASSWORD);
+  dump(loginResult);
+  if (loginResult.toLowerCase().includes('sign')) {
+    // TODO: show insight error
+    return dump('Insight login error');
+  }
+  dump('Success!');
+  await saveData({insightEmail: email, insightPassword: password});
+  showContainer('create-container');
+}
+
+showContainer = (containerId) => {
+  $('.container').addClass('display-none');
+  $(`#${containerId}`).removeClass('display-none');
 }
 
 dump = (input) => {
-  $('#dump').append(`${String(input)}\n`);
+  $('#dump').prepend(`${JSON.stringify(input)}<br />`);
 }
 
+saveData = async (obj) => {
+  await chromep.storage.sync.set(obj);
+  dump(`${JSON.stringify(obj)} saved`);
+}
 
-// function saveData(obj, callback) {
-//   chrome.storage.sync.set(obj, () => {
-//     callback();
+readData = async (keys) => {
+  return chromep.storage.sync.get(keys);
+}
+
+// createDaily = async () => {
+//   return $.ajax({
+//     url: 'https://habitica.com/api/v3/tasks/user',
+//     type: 'POST',
+//     data: {'text': `Meditate for ${medLength} minutes`, 'type': 'daily',},
+//     beforeSend: (xhr) => {
+//       xhr.setRequestHeader('x-api-user', items.userID);
+//       xhr.setRequestHeader('x-api-key',  items.apiToken);
+//     },
 //   });
 // }
 
-// function readData(keys, callback) {
-//   chrome.storage.sync.get(keys, (items) => {
-//     callback(items);
+// scoreDaily = async () => {
+//   return $.ajax({
+//     url: `https://habitica.com/api/v3/tasks/${items.taskID}/score/up`,
+//     type: 'POST',
+//     beforeSend: (xhr) => {
+//       xhr.setRequestHeader('x-api-user', items.userID);
+//       xhr.setRequestHeader('x-api-key',  items.apiToken);
+//     },
 //   });
-// }
-
-// function createDaily() {
-//   readData(['userID', 'apiToken'], (items) => {
-//     let response = '';
-//     let medLength = $('#meditation-num').val();
-
-//     $.ajax({
-//       url: 'https://habitica.com/api/v3/tasks/user',
-//       type: 'POST',
-//       data: {'text': `Meditate for ${medLength} minutes`, 'type': 'daily',},
-//       async: true,
-//       beforeSend: (xhr) => {
-//         xhr.setRequestHeader('x-api-user', items.userID);
-//         xhr.setRequestHeader('x-api-key',  items.apiToken);
-//       },
-//       success: (res) => {
-//         response = res;
-//       },
-//       complete: () => {
-//         console.log(response);
-//         saveData({'taskID': response.data.id,}, () => {
-//           scoreDaily();
-//         });
-//       },
-//     });
-//   });
-// }
-
-// function scoreDaily() {
-//   let response = ""
-//   // readData(['userID', 'apiToken', 'taskID'], (items) => {
-//   //   if (items.taskID && items.userID && items.apiToken) {
-//   //     $.ajax({
-//   //       url: `https://habitica.com/api/v3/tasks/${items.taskID}/score/up`,
-//   //       type: 'POST',
-//   //       async: true,
-//   //       beforeSend: (xhr) => {
-//   //         xhr.setRequestHeader('x-api-user', items.userID);
-//   //         xhr.setRequestHeader('x-api-key',  items.apiToken);
-//   //       },
-//   //       success: (res) => {
-//   //         response = res;
-//   //       },
-//   //       complete: () => {
-//   //         console.log(response);
-//   //       },
-//   //     });
-//   //   }
-//   // });
 // }

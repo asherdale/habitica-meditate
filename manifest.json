@@ -11,6 +11,7 @@
       "vendor/jquery-3.2.1.min.js",
       "vendor/jquery.csv.js",
       "vendor/moment.js",
+      "src/js/helpers.js",
       "src/js/config.js",
       "src/js/eventPage.js"
     ],

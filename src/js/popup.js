@@ -15,6 +15,7 @@ let isHabiticaLogin = true;
 
 main = () => {
   $('#login-button').click(login);
+  $('#goal-button').click(setGoal);
 
   attemptAutoLogin();
 }
@@ -82,7 +83,7 @@ insightLogin = async (email, password, isAutoLogin) => {
     await saveData({[LOGIN_INFO.iEmail]: email, [LOGIN_INFO.iPass]: password});
   }
 
-  showContainer('create-container');
+  showContainer('goal-container');
   return true;
 }
 
@@ -107,11 +108,26 @@ clearData = async () => {
   await chromep.storage.sync.clear();
 }
 
-createDaily = async (userId, apiToken) => {
+setGoal = async () => {
+  const goalInput = $('#goal-input').val();
+  const goalNum = parseInt(goalInput);
+  dump(goalNum);
+
+  if (goalNum < 1) {
+    throw new Error('Invalid goal input');
+  }
+
+  // TODO: create object that contains the current login info for the user (both habitica and insight)
+
+  // const dailyCreation = await createDaily(userId, apiToken, goalNum);
+  // dump(dailyCreation);
+}
+
+createDaily = async (userId, apiToken, goal) => {
   return $.ajax({
     url: 'https://habitica.com/api/v3/tasks/user',
     type: 'POST',
-    data: {'text': `Meditate for ${medLength} minutes`, 'type': 'daily',},
+    data: {'text': `Meditate for ${goal} minutes`, 'type': 'daily',},
     beforeSend: (xhr) => {
       xhr.setRequestHeader('x-api-user', userId);
       xhr.setRequestHeader('x-api-key',  apiToken);

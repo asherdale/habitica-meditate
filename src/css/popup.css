@@ -1,5 +1,5 @@
 body {
-   	width: 300px;
+   	width: 400px;
    	/*height: 200px;*/
    	margin: 20px;
 }
@@ -13,10 +13,37 @@ body {
 	font-size: 17px;
 }
 
-#login-header {
+.page-header {
 	margin: 0 0 20px 0;
+	border: none;
 }
 
 .display-none {
 	display: none;
+}
+
+#goal-input {
+	width: 80px;
+	margin: 0 auto;
+}
+
+.goal-text {
+	margin: 10px;
+	font-size: 17px;
+}
+
+#goal-header {
+	margin-bottom: 0;
+}
+
+#goal-button {
+	margin-top: 10px;
+}
+
+
+/* Disable the little up-down arrows typically added to number inputs */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
 }

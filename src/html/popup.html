@@ -17,13 +17,17 @@
 
   <body>
     <div id="login-container" class="container text-center">
-      <h4 id="login-header">Step 1: Login to Habitica</h4>
+      <h4 class="page-header" id="login-header">Step 1: Login to Habitica</h4>
       <input id="input-user" class="form-control" placeholder="User ID">        
       <input id="input-pass" class="form-control" placeholder="API Token" type="password">
       <button id="login-button" class="btn btn-primary">Login</button>
     </div>
-    <div id="create-container" class="container display-none">
-      <h4>Set Your Daily Goal</h4>
+    <div id="goal-container" class="container text-center display-none">
+      <h4 id="goal-header" class="page-header">Step 3: Set Your Daily Meditation Goal</h4>
+      <p class="goal-text">I will meditate</p>
+      <input id="goal-input" class="form-control text-center" type="number" placeholder="X" />
+      <p class="goal-text">minutes a day.</p>
+      <button id="goal-button" class="btn btn-primary">Create Habitica Daily</button>
     </div>
     <div id="dump"></div>
   </body>

@@ -7,7 +7,7 @@ checkMeditationData = async (alarm) => {
 }
 
 getMeditationData = async () => {
-  await insightLogin(INSIGHT_EMAIL, INSIGHT_PASSWORD);
+  await postInsightLogin(INSIGHT_EMAIL, INSIGHT_PASSWORD);
   const numGrabs = 7;
   const vals = await Promise.all(
     Array.from(

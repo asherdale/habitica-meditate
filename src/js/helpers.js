@@ -2,7 +2,7 @@ const INSIGHT_LOGIN_URL = 'https://insighttimer.com/user_session';
 const INSIGHT_CSV_URL = 'https://insighttimer.com/sessions/export';
 const HABITICA_PREFS_URL = 'https://habitica.com/api/v3/user?userFields=preferences.dayStart';
 
-insightLogin = async (email, password) => {
+postInsightLogin = async (email, password) => {
 	return $.ajax({
     url: INSIGHT_LOGIN_URL,
     type: 'POST',

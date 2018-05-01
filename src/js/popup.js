@@ -13,32 +13,39 @@ const INSIGHT_LOGIN_CONFIG = {
 
 let isHabiticaLogin = true;
 
-$(document).ready(() => main());
-
-main = async () => {
+main = () => {
   $('#login-button').click(login);
 
-  const savedLoginInfo = await readData(Object.values(LOGIN_INFO));
-  if (!savedLoginInfo.habiticaUserId || !savedLoginInfo.habiticaApiToken) {
+  attemptAutoLogin();
+}
+
+attemptAutoLogin = async () => {
+  const loginStorage = await readData(Object.values(LOGIN_INFO));
+  const autoLoginAttempt = await autoLogin(loginStorage[LOGIN_INFO.hUser],
+                                           loginStorage[LOGIN_INFO.hToken]);
+  if (!autoLoginAttempt) {
     return;
   }
-  const habiticaLoginAttempt = await clientHabiticaLogin(savedLoginInfo.habiticaUserId, savedLoginInfo.habiticaApiToken, true);
-  if (habiticaLoginAttempt) {
-    isHabiticaLogin = false;
-    if (!savedLoginInfo.insightEmail || !savedLoginInfo.insightPassword) {
-      return;
-    }
-    await clientInsightLogin(savedLoginInfo.insightEmail, savedLoginInfo.insightPassword, true);
+  await autoLogin(loginStorage[LOGIN_INFO.iEmail],
+                  loginStorage[LOGIN_INFO.iPass]);
+}
+
+autoLogin = async (savedUser, savedPass) => {
+  if (!savedUser || !savedPass) {
+    return;
   }
+  $('#input-user').val(savedUser);
+  $('#input-pass').val(savedPass);
+  return login();
 }
 
-login = () => {
+login = async () => {
   const loginInput = $('input').map((i, el) => $(el).val()).get();
-  return isHabiticaLogin ? clientHabiticaLogin(loginInput[0], loginInput[1], false)
-                         : clientInsightLogin(loginInput[0], loginInput[1], false);
+  return isHabiticaLogin ? habiticaLogin(loginInput[0], loginInput[1])
+                         : insightLogin(loginInput[0], loginInput[1]);
 }
 
-clientHabiticaLogin = async (userId, apiToken, isAutoLogin) => {
+habiticaLogin = async (userId, apiToken, isAutoLogin) => {
   try {
     const userData = await getHabiticaCustomStart(userId, apiToken);
     if (!isAutoLogin) {
@@ -64,11 +71,11 @@ transferToInsightLogin = () => {
   resetToPlaceholder($('#input-pass'), INSIGHT_LOGIN_CONFIG.passPlaceholder);
 }
 
-clientInsightLogin = async (email, password, isAutoLogin) => {
-  const loginResult = await insightLogin(email, password);
+insightLogin = async (email, password, isAutoLogin) => {
+  const loginResult = await postInsightLogin(email, password);
   if (loginResult.toLowerCase().includes('sign')) {
     dump('Insight login error');
-    return false;
+    return;
   }
 
   if (!isAutoLogin) {
@@ -122,3 +129,5 @@ scoreDaily = async (userId, apiToken) => {
     },
   });
 }
+
+$(document).ready(main);

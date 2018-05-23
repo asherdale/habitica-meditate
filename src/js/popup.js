@@ -1,8 +1,9 @@
-const LOGIN_INFO = {
+const SAVE_KEYS = {
   hUser: 'habiticaUserId',
   hToken: 'habiticaApiToken',
   iEmail: 'insightEmail',
-  iPass: 'insightPassword'
+  iPass: 'insightPassword',
+  dailyId: 'meditationDailyId'
 };
 
 const INSIGHT_LOGIN_CONFIG = {
@@ -10,6 +11,8 @@ const INSIGHT_LOGIN_CONFIG = {
   userPlaceholder: 'Email',
   passPlaceholder: 'Password'
 };
+
+const SESSION_INFO = {};
 
 let isHabiticaLogin = true;
 
@@ -21,14 +24,14 @@ main = () => {
 }
 
 attemptAutoLogin = async () => {
-  const loginStorage = await readData(Object.values(LOGIN_INFO));
-  const autoLoginAttempt = await autoLogin(loginStorage[LOGIN_INFO.hUser],
-                                           loginStorage[LOGIN_INFO.hToken]);
+  const loginStorage = await readData(Object.values(SAVE_KEYS));
+  const autoLoginAttempt = await autoLogin(loginStorage[SAVE_KEYS.hUser],
+                                           loginStorage[SAVE_KEYS.hToken]);
   if (!autoLoginAttempt) {
     return;
   }
-  await autoLogin(loginStorage[LOGIN_INFO.iEmail],
-                  loginStorage[LOGIN_INFO.iPass]);
+  await autoLogin(loginStorage[SAVE_KEYS.iEmail],
+                  loginStorage[SAVE_KEYS.iPass]);
 }
 
 autoLogin = async (savedUser, savedPass) => {
@@ -50,8 +53,15 @@ habiticaLogin = async (userId, apiToken, isAutoLogin) => {
   try {
     const userData = await getHabiticaCustomStart(userId, apiToken);
     if (!isAutoLogin) {
-      await saveData({[LOGIN_INFO.hUser]: userId, [LOGIN_INFO.hToken]: apiToken});
+      await saveData(
+        {
+          [SAVE_KEYS.hUser]: userId,
+          [SAVE_KEYS.hToken]: apiToken
+        }
+      );
     }
+    SESSION_INFO.hUser = userId;
+    SESSION_INFO.hToken = apiToken;
     transferToInsightLogin();
     return true;
   } catch (e) {
@@ -80,8 +90,11 @@ insightLogin = async (email, password, isAutoLogin) => {
   }
 
   if (!isAutoLogin) {
-    await saveData({[LOGIN_INFO.iEmail]: email, [LOGIN_INFO.iPass]: password});
+    await saveData({[SAVE_KEYS.iEmail]: email, [SAVE_KEYS.iPass]: password});
   }
+
+  SESSION_INFO.iEmail = email;
+  SESSION_INFO.iPass = password;
 
   showContainer('goal-container');
   return true;
@@ -111,16 +124,24 @@ clearData = async () => {
 setGoal = async () => {
   const goalInput = $('#goal-input').val();
   const goalNum = parseInt(goalInput);
-  dump(goalNum);
 
   if (goalNum < 1) {
     throw new Error('Invalid goal input');
   }
 
-  // TODO: create object that contains the current login info for the user (both habitica and insight)
+  const createdDaily = await createDaily(
+    SESSION_INFO.hUser,
+    SESSION_INFO.hToken,
+    goalNum
+  );
 
-  // const dailyCreation = await createDaily(userId, apiToken, goalNum);
-  // dump(dailyCreation);
+  const dailyId = createdDaily.data.id;
+
+  SESSION_INFO.dailyId = dailyId;
+  SESSION_INFO.goalNum = goalNum;
+  await saveData({[SAVE_KEYS.dailyId]: createdDaily.data.id});
+  setUpMainContainer();
+  showContainer('main-container');
 }
 
 createDaily = async (userId, apiToken, goal) => {
@@ -144,6 +165,10 @@ scoreDaily = async (userId, apiToken) => {
       xhr.setRequestHeader('x-api-key',  apiToken);
     },
   });
+}
+
+setUpMainContainer = () => {
+  $('#goal-num').text(SESSION_INFO.goalNum);
 }
 
 $(document).ready(main);

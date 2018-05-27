@@ -6,8 +6,6 @@
   "version": "1.0.0",
   "background": {
     "scripts": [
-      "vendor/react.production.min.js",
-      "vendor/react-dom.production.min.js",
       "vendor/jquery-3.2.1.min.js",
       "vendor/jquery.csv.js",
       "vendor/moment.js",

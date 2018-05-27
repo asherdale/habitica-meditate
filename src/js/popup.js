@@ -1,11 +1,3 @@
-const SAVE_KEYS = {
-  hUser: 'habiticaUserId',
-  hToken: 'habiticaApiToken',
-  iEmail: 'insightEmail',
-  iPass: 'insightPassword',
-  dailyId: 'meditationDailyId'
-};
-
 const INSIGHT_LOGIN_CONFIG = {
   header: 'Step 2: Login to Insight Timer',
   userPlaceholder: 'Email',
@@ -24,14 +16,17 @@ main = () => {
 }
 
 attemptAutoLogin = async () => {
-  const loginStorage = await readData(Object.values(SAVE_KEYS));
-  const autoLoginAttempt = await autoLogin(loginStorage[SAVE_KEYS.hUser],
-                                           loginStorage[SAVE_KEYS.hToken]);
+  const storedData = await getAllStoredData();
+  console.log(storedData);
+  SESSION_INFO.dailyId = storedData[SAVE_KEYS.dailyId];
+  SESSION_INFO.goalNum = storedData[SAVE_KEYS.goalNum];
+  const autoLoginAttempt = await autoLogin(storedData[SAVE_KEYS.hUser],
+                                           storedData[SAVE_KEYS.hToken]);
   if (!autoLoginAttempt) {
     return;
   }
-  await autoLogin(loginStorage[SAVE_KEYS.iEmail],
-                  loginStorage[SAVE_KEYS.iPass]);
+  await autoLogin(storedData[SAVE_KEYS.iEmail],
+                  storedData[SAVE_KEYS.iPass]);
 }
 
 autoLogin = async (savedUser, savedPass) => {
@@ -53,12 +48,10 @@ habiticaLogin = async (userId, apiToken, isAutoLogin) => {
   try {
     const userData = await getHabiticaCustomStart(userId, apiToken);
     if (!isAutoLogin) {
-      await saveData(
-        {
-          [SAVE_KEYS.hUser]: userId,
-          [SAVE_KEYS.hToken]: apiToken
-        }
-      );
+      await saveData({
+        [SAVE_KEYS.hUser]: userId,
+        [SAVE_KEYS.hToken]: apiToken
+      });
     }
     SESSION_INFO.hUser = userId;
     SESSION_INFO.hToken = apiToken;
@@ -96,8 +89,15 @@ insightLogin = async (email, password, isAutoLogin) => {
   SESSION_INFO.iEmail = email;
   SESSION_INFO.iPass = password;
 
+  transferAfterLogin();
+}
+
+transferAfterLogin = () => {
+  if (SESSION_INFO.dailyId && SESSION_INFO.goalNum) {
+    transferToMainPage();
+    return;
+  }
   showContainer('goal-container');
-  return true;
 }
 
 showContainer = (containerId) => {
@@ -107,18 +107,6 @@ showContainer = (containerId) => {
 
 dump = (input) => {
   $('#dump').prepend(`${JSON.stringify(input)}<br />`);
-}
-
-saveData = async (obj) => {
-  await chromep.storage.sync.set(obj);
-}
-
-readData = async (keys) => {
-  return chromep.storage.sync.get(keys);
-}
-
-clearData = async () => {
-  await chromep.storage.sync.clear();
 }
 
 setGoal = async () => {
@@ -139,9 +127,11 @@ setGoal = async () => {
 
   SESSION_INFO.dailyId = dailyId;
   SESSION_INFO.goalNum = goalNum;
-  await saveData({[SAVE_KEYS.dailyId]: createdDaily.data.id});
-  setUpMainContainer();
-  showContainer('main-container');
+  await saveData({
+    [SAVE_KEYS.dailyId]: createdDaily.data.id,
+    [SAVE_KEYS.goalNum]: goalNum
+  });
+  transferToMainPage();
 }
 
 createDaily = async (userId, apiToken, goal) => {
@@ -167,8 +157,9 @@ scoreDaily = async (userId, apiToken) => {
   });
 }
 
-setUpMainContainer = () => {
+transferToMainPage = () => {
   $('#goal-num').text(SESSION_INFO.goalNum);
+  showContainer('main-container');
 }
 
 $(document).ready(main);

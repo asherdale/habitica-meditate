@@ -1,13 +1,31 @@
 checkMeditationData = async (alarm) => {
-  return;
-  const meditationData = await getMeditationData();
-  const habiticaDayStart = await getHabiticaDayStart();
-  const minsToday = await getMinsMeditatedToday(meditationData, habiticaDayStart);
-  console.log('Minutes meditated today: ', minsToday);
+  const storedData = await getAllStoredData();
+  const meditationData = await getMeditationData(
+    storedData[SAVE_KEYS.iEmail],
+    storedData[SAVE_KEYS.iPass]
+  );
+  const habiticaDayStart = await getHabiticaDayStart(
+    storedData[SAVE_KEYS.hUser],
+    storedData[SAVE_KEYS.hToken]
+  );
+  const minsToday = await getMinsMeditatedToday(
+    meditationData,
+    habiticaDayStart
+  );
+  const goalReached = minsToday >= storedData[SAVE_KEYS.goalNum];
+  const now = moment().format('MM-DD-YYYY H:m:s');
+  const dataToSave = {
+    [SAVE_KEYS.mData]: minsToday,
+    [SAVE_KEYS.syncDate]: now
+  };
+  if (goalReached) {
+    dataToSave[SAVE_KEYS.lastGoal] = now;
+  }
+  await saveData(dataToSave);
 }
 
-getMeditationData = async () => {
-  await postInsightLogin(INSIGHT_EMAIL, INSIGHT_PASSWORD);
+getMeditationData = async (iEmail, iPass) => {
+  await postInsightLogin(iEmail, iPass);
   const numGrabs = 7;
   const vals = await Promise.all(
     Array.from(
@@ -31,7 +49,6 @@ getMinsMeditatedToday = (meditationData, habiticaDayStart) => {
   let meditationMinsToday = 0;
   let i = 2;
 
-  console.log(habiticaDayStart.format());
   while (meditationData[i]) {
     const offsetTime = moment(meditationData[i][0], 'MM-DD-YYYY HH:mm:ss');
     const correctTime = offsetTime.clone().add(offsetTime.utcOffset(), 'm');
@@ -47,8 +64,8 @@ getMinsMeditatedToday = (meditationData, habiticaDayStart) => {
   return meditationMinsToday;
 }
 
-getHabiticaDayStart = async () => {
-  const userData = await getHabiticaCustomStart(HABITICA_USER_ID, HABITICA_API_TOKEN);
+getHabiticaDayStart = async (hUser, hToken) => {
+  const userData = await getHabiticaCustomStart(hUser, hToken);
 
   const customStartHour = userData.data.preferences.dayStart;
   const customStartTime = moment().startOf('day').add(customStartHour, 'h');

@@ -1,25 +1,28 @@
-checkMeditationData = async (alarm) => {
+checkMeditationData = async () => {
   const storedData = await getAllStoredData();
+  // if (isToday(storedData.lastGoal)) {
+  //   return;
+  // }
   const meditationData = await getMeditationData(
-    storedData[SAVE_KEYS.iEmail],
-    storedData[SAVE_KEYS.iPass]
+    storedData.iEmail,
+    storedData.iPass
   );
   const habiticaDayStart = await getHabiticaDayStart(
-    storedData[SAVE_KEYS.hUser],
-    storedData[SAVE_KEYS.hToken]
+    storedData.hUser,
+    storedData.hToken
   );
   const minsToday = await getMinsMeditatedToday(
     meditationData,
     habiticaDayStart
   );
-  const goalReached = minsToday >= storedData[SAVE_KEYS.goalNum];
-  const now = moment().format('MM-DD-YYYY H:m:s');
+  const goalReached = minsToday >= storedData.goalNum;
+  const now = moment().format(config.DATE_FORMAT);
   const dataToSave = {
-    [SAVE_KEYS.mData]: minsToday,
-    [SAVE_KEYS.syncDate]: now
+    mData: minsToday,
+    syncDate: now
   };
   if (goalReached) {
-    dataToSave[SAVE_KEYS.lastGoal] = now;
+    dataToSave.lastGoal = now;
   }
   await saveData(dataToSave);
 }
@@ -29,28 +32,31 @@ getMeditationData = async (iEmail, iPass) => {
   const numGrabs = 7;
   const vals = await Promise.all(
     Array.from(
-      {length: numGrabs},
-      i => $.ajax(INSIGHT_CSV_URL)
+      {length: config.NUM_REQS_TO_INSIGHT},
+      i => $.ajax(config.INSIGHT_CSV_URL)
     )
   );
   const csvs = vals.map(val => $.csv.toArrays(val));
   const times = {};
   csvs.forEach((csv) => {
-    const time = csv[2][0];
+    csv.splice(0, 2);
+    const time = csv[0][0];
     times[time] = times[time] ? times[time] + 1 : 1;
   });
-  const accurateTime = Object.keys(times).find(t => times[t] > numGrabs / 2);
+  const accurateTime = Object.keys(times).find(t => {
+    return times[t] > config.NUM_REQS_TO_INSIGHT / 2;
+  });
   return accurateTime ? 
-         csvs.find(csv => csv[2][0] === accurateTime) :
+         csvs.find(csv => csv[0][0] === accurateTime) :
          getMeditationData();
 }
 
 getMinsMeditatedToday = (meditationData, habiticaDayStart) => {
   let meditationMinsToday = 0;
-  let i = 2;
+  let i = 0;
 
   while (meditationData[i]) {
-    const offsetTime = moment(meditationData[i][0], 'MM-DD-YYYY HH:mm:ss');
+    const offsetTime = moment(meditationData[i][0], config.DATE_FORMAT);
     const correctTime = offsetTime.clone().add(offsetTime.utcOffset(), 'm');
     const sessionMins = parseInt(meditationData[i][1]);
     i += 1;

@@ -23,6 +23,7 @@ checkMeditationData = async () => {
   };
   if (goalReached) {
     dataToSave.lastGoal = now;
+    await scoreTask(storedData.hUser, storedData.hToken, storedData.dailyId);
   }
   await saveData(dataToSave);
 }

@@ -52,3 +52,14 @@ getHabiticaCustomStart = async (userId, apiToken) => {
 }
 
 isToday = date => moment(date, config.DATE_FORMAT).isSame(moment(), 'day');
+
+scoreTask = async (userId, apiToken, taskId) => {
+  return $.ajax({
+    url: config.HABITICA_SCORE_TASK(taskId),
+    type: 'POST',
+    beforeSend: (xhr) => {
+      xhr.setRequestHeader('x-api-user', userId);
+      xhr.setRequestHeader('x-api-key',  apiToken);
+    },
+  });
+}

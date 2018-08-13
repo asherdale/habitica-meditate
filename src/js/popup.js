@@ -109,9 +109,10 @@ setGoal = async () => {
     throw new Error('Invalid goal input');
   }
 
-  const createdDaily = await createDaily(
+  const createdDaily = await createTask(
     SESSION_INFO.hUser,
     SESSION_INFO.hToken,
+    config.HABITICA_TASK_TYPE.DAILY,
     goalNum
   );
 
@@ -126,23 +127,12 @@ setGoal = async () => {
   transferToMainPage();
 }
 
-createDaily = async (userId, apiToken, goal) => {
+createTask = async (userId, apiToken, type, goal) => {
   return $.ajax({
-    url: 'https://habitica.com/api/v3/tasks/user',
+    url: config.HABITICA_CREATE_TASK,
     type: 'POST',
-    data: {'text': `Meditate for ${goal} minutes`, 'type': 'daily',},
-    beforeSend: (xhr) => {
-      xhr.setRequestHeader('x-api-user', userId);
-      xhr.setRequestHeader('x-api-key',  apiToken);
-    },
-  });
-}
-
-scoreDaily = async (userId, apiToken) => {
-  return $.ajax({
-    url: `https://habitica.com/api/v3/tasks/${items.taskID}/score/up`,
-    type: 'POST',
-    beforeSend: (xhr) => {
+    data: {'text': config.HABITICA_TASK_TEXT(goal), 'type': type},
+    beforeSend: (xhr) => {  
       xhr.setRequestHeader('x-api-user', userId);
       xhr.setRequestHeader('x-api-key',  apiToken);
     },
@@ -151,12 +141,24 @@ scoreDaily = async (userId, apiToken) => {
 
 transferToMainPage = () => {
   $('#goal-num').text(SESSION_INFO.goalNum);
-  $('#progress-num').text(SESSION_INFO.mData);
   $('#sync-date').text(SESSION_INFO.syncDate);
+  if (isToday(SESSION_INFO.syncDate)) {
+    $('#progress-num').text(SESSION_INFO.mData);
+  }
   if (isToday(SESSION_INFO.lastGoal)) {
     $('#goal-reached').text(config.GOAL_REACHED_TEXT);
   }
   showContainer('main-container');
+}
+
+taskExists = async (taskId) => {
+  return $.ajax({
+    url: config.HABITICA_GET_TASK(taskId),
+    beforeSend: (xhr) => {
+      xhr.setRequestHeader('x-api-user', userId);
+      xhr.setRequestHeader('x-api-key',  apiToken);
+    },
+  });
 }
 
 $(document).ready(main);
